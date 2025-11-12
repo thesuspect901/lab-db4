@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: lab4_app
+    ports:
+      - "80:8080"            # відкриває Flask-додаток на порту 80 для зовнішнього доступу
+    env_file:
+      - ./add/.env           # змінні середовища (MySQL, JWT тощо)
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "app/my_project/app.py"]
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
