@@ -1,0 +1,57 @@
+# Віртуальні середовища
+venv/
+.env/
+.venv/
+env/
+ENV/
+
+# Кеш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Конфігураційні файли IDE / редакторів
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Логи
+*.log
+
+# Тестові / coverage файли
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Артефакти збірки
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Тимчасові файли
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+.profile
+__pypackages__/
+
+# Додатково для Django / Flask (якщо потрібно)
+*.sqlite3
+instance/
+*.pyc

@@ -7,7 +7,7 @@ story_bp = Blueprint('story_bp', __name__, url_prefix='/api/stories')
 media_bp = Blueprint('media_bp', __name__, url_prefix='/api/media')
 
 # ---------- User Routes ----------
-@user_bp.route('/', methods=['GET'])
+@user_bp.route('/', methods=['GET'])    
 def get_all_users():
     return UserController.get_all_users()
 

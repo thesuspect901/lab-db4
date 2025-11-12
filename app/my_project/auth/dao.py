@@ -26,6 +26,7 @@ class UserDAO:
     @staticmethod
     def get_all_users():
         try:
+            print("ghdfjkghdfjklghdfsjkghdfkjlhkjdfghjfdfkls")
             cursor = current_app.mysql.connection.cursor()
             cursor.execute("SELECT * FROM Users")
             users = [User(*row).to_dict() for row in cursor.fetchall()]
