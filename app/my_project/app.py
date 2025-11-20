@@ -14,35 +14,10 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity  
 
 
-swagger_config = {
-    "headers": [],
-    "specs": [
-        {
-            "endpoint": 'apispec',
-            "route": '/apispec.json',
-            "rule_filter": lambda rule: True,  # показує ВСІ endpoints
-            "model_filter": lambda tag: True,
-        }
-    ],
-    "static_url_path": "/flasgger_static",
-    "swagger_ui": True,
-    "specs_route": "/swagger/"
-}
-
-swagger_template = {
-    "info": {
-        "title": "Lab4 API Documentation",
-        "description": "API documentation for Users, Stories and Media",
-        "version": "1.0.0"
-    }
-}
-
-
 app = Flask(__name__)
-Swagger(app, config=swagger_config, template=swagger_template)
 bcrypt = Bcrypt(app)
 
-# ===== Конфігурація під AWS RDS =====
+# ----- Конфіг ----- #
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'admin')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
@@ -85,6 +60,32 @@ try:
     print("✅ Blueprints loaded successfully.")
 except Exception as e:
     print("❌ Blueprint import error:", e)
+
+swagger_template = {
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Lab4 API",
+        "description": "API documentation for Users, Stories and Media",
+        "version": "1.0.0"
+    }
+}
+
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": "apispec",
+            "route": "/apispec.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/swagger/"
+}
+
+Swagger(app, config=swagger_config, template=swagger_template)
 
 @app.route('/health')
 def health():
