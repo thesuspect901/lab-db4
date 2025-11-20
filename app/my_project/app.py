@@ -76,14 +76,16 @@ swagger_config = {
         {
             "endpoint": "apispec",
             "route": "/apispec.json",
-            "rule_filter": lambda rule: True,
+            "rule_filter": lambda rule: True,   # показати всі маршрути
             "model_filter": lambda tag: True
         }
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/swagger/"
+    "specs_route": "/swagger/",
+    "autoscan": True                      # <-- ОБОВʼЯЗКОВО!
 }
+
 
 Swagger(app, config=swagger_config, template=swagger_template)
 
