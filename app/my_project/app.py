@@ -62,7 +62,7 @@ except Exception as e:
     print("❌ Blueprint import error:", e)
 
 swagger_template = {
-    "openapi": "3.0.2",
+    "swagger": "2.0",
     "info": {
         "title": "Lab4 API",
         "description": "API documentation for Users, Stories and Media",
