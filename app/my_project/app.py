@@ -13,8 +13,33 @@ from flask_bcrypt import Bcrypt
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity  
 
+
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": 'apispec',
+            "route": '/apispec.json',
+            "rule_filter": lambda rule: True,  # показує ВСІ endpoints
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/swagger/"
+}
+
+swagger_template = {
+    "info": {
+        "title": "Lab4 API Documentation",
+        "description": "API documentation for Users, Stories and Media",
+        "version": "1.0.0"
+    }
+}
+
+
 app = Flask(__name__)
-Swagger(app)
+Swagger(app, config=swagger_config, template=swagger_template)
 bcrypt = Bcrypt(app)
 
 # ===== Конфігурація під AWS RDS =====
