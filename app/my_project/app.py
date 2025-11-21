@@ -159,22 +159,22 @@ def register():
         401: {"description": "Invalid credentials"}
     }
 })
-# @app.route('/login', methods=['POST'])
-# def login():
-#     data = request.get_json()
-#     username = data.get("username")
-#     password = data.get("password")
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
 
-#     cur = mysql.connection.cursor()
-#     cur.execute("SELECT user_id, password FROM Users WHERE username=%s", (username,))
-#     user = cur.fetchone()
-#     cur.close()
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT user_id, password FROM Users WHERE username=%s", (username,))
+    user = cur.fetchone()
+    cur.close()
 
-#     if not user or not bcrypt.check_password_hash(user[1], password):
-#         return jsonify({"error": "Invalid credentials"}), 401
+    if not user or not bcrypt.check_password_hash(user[1], password):
+        return jsonify({"error": "Invalid credentials"}), 401
 
-#     access_token = create_access_token(identity={"user_id": user[0], "username": username})
-#     return jsonify({"access_token": access_token}), 200
+    access_token = create_access_token(identity={"user_id": user[0], "username": username})
+    return jsonify({"access_token": access_token}), 200
 
 
 @swag_from({
