@@ -6,7 +6,7 @@ load_dotenv()
 from datetime import timedelta
 import mysql.connector as sql_connector
 
-from flasgger import Swagger
+from flasgger import Swagger, swag_from
 
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
@@ -32,6 +32,8 @@ jwt = JWTManager(app)
 mysql = MySQL(app)
 app.mysql = mysql
 
+
+# ----- Ініціалізація БД ----- #
 def init_db():
     """Перевіряє, чи існує БД lab4, якщо ні — створює"""
     try:
@@ -50,8 +52,10 @@ def init_db():
     except Exception as e:
         print("❌ Database init error:", e)
 
+
 init_db()
 
+# ----- Підключення blueprints ----- #
 try:
     from auth.route import user_bp, story_bp, media_bp
     app.register_blueprint(user_bp)
@@ -61,6 +65,8 @@ try:
 except Exception as e:
     print("❌ Blueprint import error:", e)
 
+
+# ================= Swagger ================= #
 swagger_template = {
     "swagger": "2.0",
     "info": {
@@ -76,23 +82,54 @@ swagger_config = {
         {
             "endpoint": "apispec",
             "route": "/apispec.json",
-            "rule_filter": lambda rule: True,   # показати всі маршрути
+            "rule_filter": lambda rule: True,
             "model_filter": lambda tag: True
         }
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
     "specs_route": "/swagger/",
-    "autoscan": True                      # <-- ОБОВʼЯЗКОВО!
+    "autoscan": True
 }
-
 
 Swagger(app, config=swagger_config, template=swagger_template)
 
+
+# ================= API ENDPOINTS ================= #
+
+
+@swag_from({
+    "tags": ["Health"],
+    "summary": "API availability check",
+    "responses": {
+        200: {"description": "Service is running"}
+    }
+})
 @app.route('/health')
 def health():
     return {"status": "ok"}
 
+
+@swag_from({
+    "tags": ["Auth"],
+    "summary": "User registration",
+    "parameters": [{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "properties": {
+                "username": {"type": "string"},
+                "password": {"type": "string"},
+                "email": {"type": "string"},
+            }
+        },
+        "required": True
+    }],
+    "responses": {
+        201: {"description": "User created"},
+        400: {"description": "Missing fields"}
+    }
+})
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -105,12 +142,23 @@ def register():
 
     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
     cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO Users (username, password, email) VALUES (%s, %s, %s)", 
-                (username, hashed_pw, email))
+    cur.execute(
+        "INSERT INTO Users (username, password, email) VALUES (%s, %s, %s)",
+        (username, hashed_pw, email)
+    )
     mysql.connection.commit()
     cur.close()
     return jsonify({"message": "User registered successfully"}), 201
 
+
+@swag_from({
+    "tags": ["Auth"],
+    "summary": "Login and receive JWT token",
+    "responses": {
+        200: {"description": "JWT token returned"},
+        401: {"description": "Invalid credentials"}
+    }
+})
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -128,6 +176,15 @@ def login():
     access_token = create_access_token(identity={"user_id": user[0], "username": username})
     return jsonify({"access_token": access_token}), 200
 
+
+@swag_from({
+    "tags": ["Auth"],
+    "summary": "Access protected route",
+    "responses": {
+        200: {"description": "Access granted"},
+        401: {"description": "Missing/invalid JWT"}
+    }
+})
 @app.route('/secure', methods=['GET'])
 @jwt_required()
 def secure():
@@ -136,6 +193,12 @@ def secure():
         "message": f"Welcome, {user['username']}! You have access to protected data."
     }), 200
 
+
+@swag_from({
+    "tags": ["Stories"],
+    "summary": "Get all stories",
+    "responses": {200: {"description": "List of stories"}}
+})
 @app.route('/stories', methods=['GET'])
 def get_stories():
     cur = mysql.connection.cursor()
@@ -145,11 +208,20 @@ def get_stories():
         JOIN Users u ON s.user_id = u.user_id
         ORDER BY s.created_at DESC
     """)
-    stories = [{"story_id": sid, "username": uname, "created_at": str(created)} 
+    stories = [{"story_id": sid, "username": uname, "created_at": str(created)}
                for sid, uname, created in cur.fetchall()]
     cur.close()
     return jsonify(stories)
 
+
+@swag_from({
+    "tags": ["Stories"],
+    "summary": "Create new story",
+    "responses": {
+        201: {"description": "Story created"},
+        401: {"description": "Unauthorized"}
+    }
+})
 @app.route('/stories', methods=['POST'])
 @jwt_required()
 def add_story():
@@ -160,6 +232,15 @@ def add_story():
     cur.close()
     return jsonify({"message": "Story created successfully"}), 201
 
+
+@swag_from({
+    "tags": ["Debug"],
+    "summary": "Database connection test",
+    "responses": {
+        200: {"description": "DB OK"},
+        500: {"description": "DB error"}
+    }
+})
 @app.route('/test-db')
 def test_db():
     try:
@@ -170,6 +251,7 @@ def test_db():
         return {"connected": True, "tables": tables}
     except Exception as e:
         return {"connected": False, "error": str(e)}
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
